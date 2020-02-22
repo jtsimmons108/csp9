@@ -4,7 +4,7 @@ aws ec2 authorize-security-group-ingress --group-id $group_id --port 80 --protoc
 sudo service httpd start
 sudo service mysqld start
 
-sudo mv httpd /etc/httpd/conf/httpd.conf
+sudo mv httpd.conf /etc/httpd/conf/httpd.conf
 
 
 
