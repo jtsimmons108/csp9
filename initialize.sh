@@ -1,20 +1,18 @@
-#!/bin/bash
-# Prepares Cloud9 workspace for use with PLTW CSP curriculum
+group_id=`aws ec2 describe-security-groups --filter Name=group-name,Values=aws-cloud9* --query "SecurityGroups[*].{ID:GroupId}" --output text`
+aws ec2 authorize-security-group-ingress --group-id $group_id --port 80 --protocol tcp --cidr 0.0.0.0/0
 
-echo "Initializing Cloud9 container for use in PLTW CSP."
-echo "Installing PHP myAdmin."
-phpmyadmin-ctl install
+sudo service httpd start
+sudo service mysqld start
 
-
-# This command used to enable tracepath for 2.1.3:
-# sudo apt-get install iputils-tracepath
+sudo mv httpd /etc/httpd/conf/httpd.conf
 
 
-echo
-echo "C9 username: "$C9_USER
+
+read -p "Enter your username for MySQL: " user
+mysql -u root -e "GRANT ALL PRIVILEGES ON *.* TO '$user'@'localhost';"
+mysql -u root -e "FLUSH PRIVILEGES;"
 
 # Change SQL password
-echo "Because the system offers MySQL access to the world through PHPMyAdmin,"
 echo "You will need to set a password for MySQL."
 echo "In a secure location, write down a new secure password (8+ chars) for MySQL."
 
@@ -40,28 +38,11 @@ do
     else
       echo
       echo "Changing MySQL password..."
-      mysql -u $C9_USER -e "set password for '$C9_USER'@'%'=password('"$pwd"');"
+      mysql -u root -e "SET PASSWORD FOR '$user'@'localhost' = PASSWORD('$pwd');"
+
+      mysql -u root -e "FLUSH PRIVILEGES;"
       echo "MySQL password changed. Use this password for MySQL and for PHPMyAdmin."
       
-      echo
-      echo "Creating setep2 script to change PHPMyAdmin controluser password..."
-      echo "#!/bin/bash" > setup2.sh
-      echo "# Script created by initialize.sh for commands that require sudo." >> setup2.sh
-      echo "">> setup2.sh
-      
-      echo "sed \"s/\$dbpass=.*/\$dbpass='"$pwd"';/\" /etc/phpmyadmin/config-db.php > /etc/phpmyadmin/config-db.php" >> setup2.sh
-      chmod 711 setup2.sh
-      
-      # This is now included in PHP5 workspace template.
-      # echo 'apt-get install python-dev' >> setup2.sh
-      
-      # This package is no longer located by apt-get
-      # echo 'apt-get install libjpeg-dev' >> setup2.sh
-      
-      echo
-      echo "****NOTE:****"
-      echo "You still need to execute setup2 to update the PHPMyAdmin control-user password. At the $ prompt, type:"
-      echo "     \$ sudo ./setup2.sh"
       
       #####
       # Create .login.php
@@ -69,7 +50,7 @@ do
       echo "<?php" > login.php
       echo '$host = "localhost";' >> login.php
       echo '$dbname ="artgallery";' >> login.php
-      echo '$username = "'$C9_USER'";' >>login.php
+      echo '$username = "'$user'";' >>login.php
       echo '$password = "'$pwd'";' >> login.php
       echo '?>' >> login.php
       
@@ -79,19 +60,17 @@ do
       # This step not required because setup.sql creates the database now.
       # mysql -u $C9_USER -p$pwd -e "CREATE DATABASE artgallery"
       # Create and populate the database.
-      mysql -u $C9_USER -p$pwd < setup.sql
+      mysql -u $user -p$pwd < setup.sql
       
       #####
       # Create database for Activity 2.2.3
       ####
-      mysql -u $C9_USER -p$pwd -e "CREATE DATABASE shoes;"
+      mysql -u $user -p$pwd -e "CREATE DATABASE shoes;"
       
       
     fi
   fi
 done
 
-# Remove git branch from shell prompt. 
-sed -i -e "s/\$(__git_ps1 \" (%s)\")//" ../.bashrc
-# Apply the new .bashrc to the current shell (This doesn't work from the script)
-# source ../.bashrc 
+public_dns=`curl -s http://169.254.169.254/latest/meta-data/public-hostname`
+echo -e "\nYou can access your site from: "  $public_dns
