@@ -1,10 +1,11 @@
 group_id=`aws ec2 describe-security-groups --filter Name=group-name,Values=aws-cloud9* --query "SecurityGroups[*].{ID:GroupId}" --output text`
 aws ec2 authorize-security-group-ingress --group-id $group_id --port 80 --protocol tcp --cidr 0.0.0.0/0
 
+sudo cp httpd.conf /etc/httpd/conf/httpd.conf
 sudo service httpd start
 sudo service mysqld start
 
-sudo cp httpd.conf /etc/httpd/conf/httpd.conf
+
 
 
 
