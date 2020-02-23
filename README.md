@@ -2,8 +2,9 @@
 Materials for PLTW Computer Science Principles for Cloud9. Scroll to read all of this document. 
 # Welcome!
 
-Please type two commands at the Bash prompt below to set up your workspace. After each command, press enter and wait for the prompt to appear again.
+After cloning the repo, please type three commands at the Bash prompt below to set up your workspace. After each command, press enter and wait for the prompt to appear again.
 
+ * `cd csp9`
  * `chmod 711 initialize.sh restart.sh`
  * `./initialize.sh`. Create and record a username and password for this workspace's MySQL server as directed.
 
