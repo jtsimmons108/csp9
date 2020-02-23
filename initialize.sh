@@ -3,6 +3,7 @@ group_id=`aws ec2 describe-security-groups --filter Name=group-name,Values=aws-c
 aws ec2 authorize-security-group-ingress --group-id $group_id --port 80 --protocol tcp --cidr 0.0.0.0/0
 
 #Replace httpd.conf so that server knows to look in csp9 folder
+sudo usermod -aG apache ec2-user
 sudo cp httpd.conf /etc/httpd/conf/httpd.conf
 sudo service httpd start
 sudo service mysqld start
