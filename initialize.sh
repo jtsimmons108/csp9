@@ -73,7 +73,7 @@ do
     fi
   fi
 done
-
+echo "Welcome to the web $user" > index.html
 
 public_dns=`curl -s http://169.254.169.254/latest/meta-data/public-hostname`
 echo -e "\nYou can access your site from: "  $public_dns
