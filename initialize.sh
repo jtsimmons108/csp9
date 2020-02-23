@@ -1,15 +1,17 @@
+#Find security group ID and Allow inbound traffic on port 80 for EC2 Instance
 group_id=`aws ec2 describe-security-groups --filter Name=group-name,Values=aws-cloud9* --query "SecurityGroups[*].{ID:GroupId}" --output text | head -n 1`
 aws ec2 authorize-security-group-ingress --group-id $group_id --port 80 --protocol tcp --cidr 0.0.0.0/0
 
+#Replace httpd.conf so that server knows to look in csp9 folder
 sudo cp httpd.conf /etc/httpd/conf/httpd.conf
 sudo service httpd start
 sudo service mysqld start
 
 
-
-
-
+#Ask for a username now since vocstartsoft is $C9_USER for all c9 instances
 read -p "Enter your username for MySQL: " user
+
+#Create new user in MySQL and grant privileges
 mysql -u root -e "GRANT ALL PRIVILEGES ON *.* TO '$user'@'localhost';"
 mysql -u root -e "FLUSH PRIVILEGES;"
 
@@ -67,11 +69,11 @@ do
       # Create database for Activity 2.2.3
       ####
       mysql -u $user -p$pwd -e "CREATE DATABASE shoes;"
-      
-      
+    
     fi
   fi
 done
+
 
 public_dns=`curl -s http://169.254.169.254/latest/meta-data/public-hostname`
 echo -e "\nYou can access your site from: "  $public_dns
